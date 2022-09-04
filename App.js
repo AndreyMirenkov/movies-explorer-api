@@ -62,6 +62,10 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/movies', require('./routes/movies'));
 
+app.post('/signout', (req, res) => {
+  res.status(202).clearCookie('jwt').send('cookie cleared');
+});
+
 app.use('/*', (req, res) => {
   res.status(404).send({ message: 'Not found' });
 });
