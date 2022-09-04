@@ -17,9 +17,9 @@ const { DB = 'mongodb://localhost:27017/moviesdb' } = process.env;
 
 app.use(helmet());
 
-app.use(RateLimiter);
-
 app.use(requestLoggder);
+
+app.use(RateLimiter);
 
 const allowedCors = [
   'http://diploma.nomorepartiesxyz.ru',
