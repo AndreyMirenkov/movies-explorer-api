@@ -26,8 +26,11 @@ module.exports.createUser = (req, res, next) => {
         email: user.email,
       },
     }))
-    .catch(() => {
-      next(new UniqueEmailError('Этот Email уже используется'));
+    .catch((err) => {
+      if (err.code === 11000) {
+        return next(new UniqueEmailError('Этот Email уже используется'));
+      }
+      return next(err);
     });
 };
 module.exports.patchProfile = (req, res, next) => {
@@ -43,8 +46,11 @@ module.exports.patchProfile = (req, res, next) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch(() => {
-      next(new UniqueEmailError('Этот Email уже используется'));
+    .catch((err) => {
+      if (err.code === 11000) {
+        return next(new UniqueEmailError('Этот Email уже используется'));
+      }
+      return next(err);
     });
 };
 module.exports.login = (req, res, next) => {
@@ -55,7 +61,7 @@ module.exports.login = (req, res, next) => {
       res.cookie('jwt', token, {
         maxAge: 3600000,
         httpOnly: true,
-        sameSite: true,
+        // sameSite: true,
       });
       res.send({ message: 'Welcome' });
     })

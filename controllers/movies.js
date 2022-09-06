@@ -1,6 +1,7 @@
 const Movie = require('../models/movie');
 const NotFoundError = require('../errors/not-found-error');
 const DeleteError = require('../errors/delete-error');
+const CastError = require('../errors/cast-error');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({}).then((movies) => res.send({ data: movies }))
@@ -33,13 +34,21 @@ module.exports.deleteMovie = (req, res, next) => {
     if (movie === null) {
       throw new NotFoundError('Запрашиваемый фильм не найден');
     }
-    if (movie.owner == req.user._id) {
-      Movie.findByIdAndRemove(movie._id).then(() => {
-        res.status(200).send({ message: 'Фильм удалён' });
-      });
-    } else {
+    if (String(movie.owner) !== req.user._id) {
       throw new DeleteError('Вы не можете удалить чужой фильм');
     }
+    return Movie.findByIdAndRemove(movie._id)
+      .then(() => {
+        res.status(200).send({ message: 'Фильм удалён' });
+      })
+      .catch((err) => {
+        next(err);
+      });
   })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new CastError('Переданы некорректные данные в запрос удаления фильма'));
+      }
+      return next(err);
+    });
 };
